@@ -3,6 +3,8 @@ import 'package:flutter/services.dart';
 import 'package:word_ladder/models/path_dictionary.dart';
 import 'package:word_ladder/screens/solver_screen.dart';
 
+int WORD_SIZE = 4;
+
 class WordSelectionScreen extends StatefulWidget {
   const WordSelectionScreen({Key? key, required this.title}) : super(key: key);
 
@@ -17,15 +19,32 @@ class _WordSelectionScreenState extends State<WordSelectionScreen> {
   TextEditingController endWordController = TextEditingController();
   PathDictionary? pathDictionary;
 
+  Set<String> getSizedWordSet(Set<String> set, int wordSize){
+    Set<String> sizedWordSet = {};
+    for (String word in set){
+      if(word.length == wordSize){
+        sizedWordSet.add(word);
+      }
+    }
+    return sizedWordSet;
+  }
+
   void loadDictionary() async {
     String data = await rootBundle.loadString("text_files/words.txt");
     Set<String> wordSet = data.split('\n').toSet();
-    print(wordSet);
+    Set<String> sizedWordSet = getSizedWordSet(wordSet, WORD_SIZE);
     setState(() {
-      pathDictionary = PathDictionary(wordSet);
+      pathDictionary = PathDictionary(sizedWordSet);
     });
+    print(pathDictionary!.findPath("gain", "fire"));
   }
 
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    loadDictionary();
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
