@@ -1,13 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:word_ladder/models/path_dictionary.dart';
+import 'package:word_ladder/models/text_field_color.dart';
 import 'package:word_ladder/widgets/action_button.dart';
+
+
+int WORD_SIZE = 4;
 class SolverScreen extends StatefulWidget {
   final String? startWord;
   final String? endWord;
-  final List<String>? wordsBetween;
   const SolverScreen({Key? key,
     this.startWord,
     this.endWord,
-    this.wordsBetween
   }
     ) : super(key: key);
 
@@ -17,22 +21,43 @@ class SolverScreen extends StatefulWidget {
 
 class _SolverScreenState extends State<SolverScreen> {
 
-  List<WordField> fields = [];
+  List<Field> fields = [];
+  PathDictionary? pathDictionary;
+  List<String>? wordsBetween;
+
+  Set<String> getSizedWordSet(Set<String> set, int wordSize){
+    Set<String> sizedWordSet = {};
+    for (String word in set){
+      if(word.length == wordSize){
+        sizedWordSet.add(word);
+      }
+    }
+    return sizedWordSet;
+  }
+
+  void loadDictionary() async {
+    String data = await rootBundle.loadString("text_files/words.txt");
+    Set<String> wordSet = data.split('\n').toSet();
+    Set<String> sizedWordSet = getSizedWordSet(wordSet, WORD_SIZE);
+    setState(() {
+      pathDictionary = PathDictionary(sizedWordSet);
+      wordsBetween = pathDictionary!.findPath(widget.startWord!, widget.endWord!);
+      createFields();
+    });
+    print(pathDictionary!.findPath(widget.startWord!, widget.endWord!));
+  }
 
   void createFields (){
-    for(String word in widget.wordsBetween!){
-      fields.add(WordField());
+    for(String word in wordsBetween!){
+      fields.add(Field());
     }
-    setState(() {
-
-    });
   }
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    createFields();
+    loadDictionary();
   }
 
   @override
@@ -50,8 +75,22 @@ class _SolverScreenState extends State<SolverScreen> {
             Text(widget.startWord!),
             Expanded(
               flex: 5,
-              child: ListView(
-                  children: fields,
+              child: ListView.builder(
+                  itemCount: fields.length,
+                  itemBuilder: (BuildContext context, int index) {
+                    return WordField(
+                      textFieldColor: fields[index],
+                      onSubmited: (value){
+                        setState(() {
+                          if(pathDictionary!.isWord(value)){
+                            fields[index].changeColor(Colors.green);
+                          }else{
+                            fields[index].changeColor(Colors.red);
+                          }
+                        });
+                      },
+                    );
+                  }
               ),
             ),
             Expanded(
@@ -64,15 +103,18 @@ class _SolverScreenState extends State<SolverScreen> {
                     ActionButton(
                       text: "Solve",
                       onPressed: (){
-                        for (int i = 0; i < widget.wordsBetween!.length; i++){
-                          fields[i].changeFieldWord(widget.wordsBetween![i]);
+                        for (int i = 0; i < wordsBetween!.length; i++){
+                          fields[i].changeColor(Colors.black);
+                          fields[i].changeFieldWord(wordsBetween![i]);
                         }
+                        setState(() {
+
+                        });
                       },
                     )
                   ],
                 )
             ),
-
           ],
         ),
       ),
@@ -81,18 +123,17 @@ class _SolverScreenState extends State<SolverScreen> {
 }
 
 class WordField extends StatelessWidget {
-  final TextEditingController textEditingController = TextEditingController();
-
+  final Field? textFieldColor;
+  final Function(String)? onSubmited;
+  WordField({this.textFieldColor, this.onSubmited});
   @override
   Widget build(BuildContext context) {
     return TextField(
-      controller: textEditingController,
-    );
-  }
-
-  void changeFieldWord(String word){
-    textEditingController.value = textEditingController.value.copyWith(
-      text: word,
+      controller: textFieldColor!.textEditingController,
+      style: TextStyle(
+        color: textFieldColor!.textColor
+      ),
+      onSubmitted: onSubmited,
     );
   }
 }
