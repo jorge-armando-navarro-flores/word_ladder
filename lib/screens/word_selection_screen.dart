@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:word_ladder/models/path_dictionary.dart';
 import 'package:word_ladder/screens/solver_screen.dart';
+import 'package:word_ladder/widgets/action_button.dart';
 
 int WORD_SIZE = 4;
 
@@ -71,10 +72,12 @@ class _WordSelectionScreenState extends State<WordSelectionScreen> {
                 ActionButton(
                   text: "Start",
                   onPressed: () {
+                    List<String> wordsBetween = pathDictionary!.findPath("gain", "fire");
                     Navigator.push(context,
                         MaterialPageRoute(builder: (context) => SolverScreen(
                           startWord: startWordController.text,
                           endWord: endWordController.text,
+                          wordsBetween: wordsBetween,
                         ))
                     );
                   },
@@ -88,27 +91,3 @@ class _WordSelectionScreenState extends State<WordSelectionScreen> {
   }
 }
 
-class ActionButton extends StatelessWidget {
-  final String? text;
-  final VoidCallback? onPressed;
-
-  const ActionButton({Key? key,
-    this.text,
-    this.onPressed}
-      ) : super(key: key);
-
-
-  @override
-  Widget build(BuildContext context) {
-    return TextButton(
-      onPressed: onPressed,
-      child: Text(
-        text!,
-        style: const TextStyle(color: Colors.black),
-      ),
-      style: TextButton.styleFrom(
-        backgroundColor: const Color(0xFFD6D7D7),
-      ),
-    );
-  }
-}
