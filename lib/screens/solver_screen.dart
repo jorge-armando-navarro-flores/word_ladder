@@ -74,7 +74,7 @@ class _SolverScreenState extends State<SolverScreen> {
           children: [
             Text(widget.startWord!),
             Expanded(
-              flex: 5,
+              flex: 50,
               child: ListView.builder(
                   itemCount: fields.length,
                   itemBuilder: (BuildContext context, int index) {
@@ -94,7 +94,7 @@ class _SolverScreenState extends State<SolverScreen> {
               ),
             ),
             Expanded(
-              flex: 6,
+              flex: 65,
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
